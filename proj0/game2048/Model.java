@@ -151,8 +151,10 @@ public class Model extends Observable {
             if (board.tile(cur_c, r) == null){
                 ret_r = r;
             } else if (board.tile(cur_c, r).value() == board.tile(cur_c, cur_r).value() && !use_flag[r][cur_c]){
-                    ret_r = r;
-                    merge = true;
+                ret_r = r;
+                merge = true;
+            } else if (board.tile(cur_c, r).value() != board.tile(cur_c, cur_r).value()){
+                break;
             }
         }
         if (merge){
