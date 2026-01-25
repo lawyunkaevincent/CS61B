@@ -113,12 +113,52 @@ public class Model extends Observable {
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
+        board.setViewingPerspective(side);
 
+        boolean[][] useflag = new boolean[board.size()][board.size()];
+        Tile t;
+        for (int r = 2; r >= 0; r -= 1){
+            for (int c = 0; c < board.size(); c += 1){
+                if (board.tile(c, r) == null){
+                    continue;
+                }
+                int merge_row = search_merge_row(useflag, r, c);
+                if (merge_row != -1){
+                    t = board.tile(c, r);
+                    boolean combine = board.move(c, merge_row, t);
+                    if (combine) {
+                        score += board.tile(c, merge_row).value();
+                    }
+                    changed = true;
+                }
+            }
+        }
+
+        board.setViewingPerspective(Side.NORTH);
         checkGameOver();
         if (changed) {
             setChanged();
         }
         return changed;
+    }
+
+    /** It will return which row to be merged with the current tile,
+     * if cannot merge then it will return -1 **/
+    private int search_merge_row(boolean[][] use_flag, int cur_r, int cur_c){
+        int ret_r = -1;
+        boolean merge = false;
+        for (int r = cur_r + 1; r < board.size(); r += 1){
+            if (board.tile(cur_c, r) == null){
+                ret_r = r;
+            } else if (board.tile(cur_c, r).value() == board.tile(cur_c, cur_r).value() && !use_flag[r][cur_c]){
+                    ret_r = r;
+                    merge = true;
+            }
+        }
+        if (merge){
+            use_flag[ret_r][cur_c] = true;
+        }
+        return ret_r;
     }
 
     /** Checks if the game is over and sets the gameOver variable
@@ -138,6 +178,14 @@ public class Model extends Observable {
      * */
     public static boolean emptySpaceExists(Board b) {
         // TODO: Fill in this function.
+        int boardSize = b.size();
+        for (int row = 0; row < boardSize; row+=1){
+            for (int col = 0; col < boardSize; col += 1){
+                if (b.tile(col, row) == null){
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -148,6 +196,17 @@ public class Model extends Observable {
      */
     public static boolean maxTileExists(Board b) {
         // TODO: Fill in this function.
+        int boardSize = b.size();
+        for (int row = 0; row < boardSize; row+=1){
+            for (int col = 0; col < boardSize; col += 1){
+                if (b.tile(col, row) == null){
+                    continue;
+                }
+                if (b.tile(col, row).value() == MAX_PIECE){
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -159,7 +218,47 @@ public class Model extends Observable {
      */
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
+        if (emptySpaceExists(b)){
+            return true;
+        }
+        for (int row = 0; row < b.size(); row+=1){
+            for (int col = 0; col < b.size(); col += 1){
+                // empty tile
+                if (b.tile(col, row) == null){
+                    continue;
+                }
+                int cur_value = b.tile(col, row).value();
+                // check upper
+                if (checkValidIndex(b,row+1)){
+                    if (b.tile(col, row+1).value() == cur_value){
+                        return true;
+                    }
+                }
+                // check down
+                if (checkValidIndex(b,row-1)){
+                    if (b.tile(col, row-1).value() == cur_value){
+                        return true;
+                    }
+                }
+                // check left
+                if (checkValidIndex(b,col-1)){
+                    if (b.tile(col-1, row).value() == cur_value){
+                        return true;
+                    }
+                }
+                // check right
+                if (checkValidIndex(b,col+1)){
+                    if (b.tile(col+1, row).value() == cur_value){
+                        return true;
+                    }
+                }
+            }
+        }
         return false;
+    }
+
+    private static boolean checkValidIndex(Board b, int idx){
+        return (idx >= 0) && idx < (b.size());
     }
 
 
