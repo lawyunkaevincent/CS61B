@@ -17,7 +17,7 @@ public class ArrayDeque<T> {
 
     public void addFirst(T item){
         if (length == size - 1){
-            reSize(size *= 2);
+            reSize(size * 2);
         }
         if (!isEmpty()){
             first = (first - 1 + size) % size;
@@ -28,7 +28,7 @@ public class ArrayDeque<T> {
 
     public void addLast(T item){
         if (length == size - 1){
-            reSize(size *= 2);
+            reSize(size * 2);
         }
         if (!isEmpty()){
             last = (last + 1) % size;
